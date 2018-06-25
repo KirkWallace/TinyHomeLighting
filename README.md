@@ -11,5 +11,6 @@ Feature List:
   - add a thermometer and use the temperature to determine the color of some lights near the door
    
    
-  _Outlandish features_
+  _More Outlandishy features_
+  - add a tiny speaker that chimes within 30 sec if I don't hit a hidden button just inside the door
   - Motion sensors for each corner that then lights up a small LED in that corner to capture movement outside in a crude way
