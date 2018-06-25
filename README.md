@@ -14,3 +14,7 @@ Feature List:
   _More Outlandishy features_
   - add a tiny speaker that chimes within 30 sec if I don't hit a hidden button just inside the door
   - Motion sensors for each corner that then lights up a small LED in that corner to capture movement outside in a crude way
+
+
+# Repositories
+- Adafruit NeoPixel : Drives the WS2812s LED strip 
