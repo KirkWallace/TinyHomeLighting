@@ -109,16 +109,15 @@ void setup() {
 
 
 void loop() {
- //showStrip(pix_c,0,36,0.5);
- 
+   double bright_val = translateToBright(pot_masterBright); 
 
-  //Signal processing here: Check in with switches
-  //GENERAL LOGIC - controls which switches control which range of LEDs 
-    //and how they should typically respond
-    double bright_val = translateToBright(pot_masterBright); 
+   //first check to see if Rainbow mode is activated. If so pass to the rainbow chase method
     
-    if( readSwitch(sw_ollie)) rainbowOn(10);
-    else { 
+    if( readSwitch(sw_ollie)) rainbowOn(12);
+    else {
+       
+  //otherwise turn each light on and assign it the RGB value from the Controller potentiometers. 
+    
     for(int i=0; i<7; i++){
       if(readSwitch(onOff[i])) 
         showStrip(strip[stripDef[i][0]], stripDef[i][1],stripDef[i][2],bright_val);
@@ -126,29 +125,7 @@ void loop() {
         clearStrip(strip[stripDef[i][0]], stripDef[i][1],stripDef[i][2]); 
     }
     }
-    /*
-    if(readSwitch(sw_topDown)) showStrip(pix_c, 0, 36,bright_val);
-      else if(!readSwitch(sw_topDown))  clearStrip(pix_c, 0, 36); 
-    if(readSwitch(sw_topUp)) showStrip(pix_c, 37, 54, bright_val);
-    else if(!readSwitch(sw_topUp))  clearStrip(pix_c, 37, 54); 
-    if(readSwitch(sw_side)) showStrip(pix_d, 0, 45, bright_val);
-    else if(!readSwitch(sw_side))  clearStrip(pix_d, 0, 45); 
-    if(readSwitch(sw_storage)) showStrip(pix_b, 0,48,bright_val); 
-    else if(!readSwitch(sw_storage))  clearStrip(pix_b, 0, 48); 
-    if(readSwitch(sw_book)) showStrip(pix_b, 49, 57, translateToBright(pot_books)); 
-    else if(!readSwitch(sw_book))  clearStrip(pix_b, 49, 57); 
-    if(readSwitch(sw_door)) showStrip(pix_b, 0, 48, .5 ); 
-    else if(!readSwitch(sw_door))  clearStrip(pix_b, 0, 48); 
-    if(readSwitch(sw_kitchen)) showStrip(pix_k, 0, 18, translateToBright(pot_kitchen)); 
-    else if(!readSwitch(sw_kitchen))  clearStrip(pix_k, 0, 18); 
-    if(show_ollie); //instant rainbow Party
-    */
-    Serial.print("pot_book_val ");
-    Serial.println(translateToBright(pot_books)); 
-    //SPECIAL CASE LOGIC 
-
   
-
 }
 
 
@@ -198,15 +175,19 @@ void rainbowOn(uint8_t wait) {
   for(j=0; j<256; j++) {
     for(int k =0; k<7; k++){ //cycle through the strips
       if(!readSwitch(sw_ollie)) break;
+      if(k==5)k=6; //skip the door switch so it elliminates flicker in rainbow mode 
       int stripNum = stripDef[k][0];
     for(i=stripDef[k][1]; i<stripDef[k][2]; i++) {
       strip[stripNum].setPixelColor(i, Wheel((i+j) & 255, stripNum ));
     }
-    if(readSwitch(onOff[k])) {
-      strip[stripNum].show();
-    }else if(k==3||k==5)//fix the case when the door and storage switches don't agree
-    break; 
-    else clearStrip(strip[stripNum], stripDef[k][1], stripDef[k][2]); 
+    ///////Turn the strips on and of while in rainbow mode
+    if(readSwitch(onOff[k])) strip[stripNum].show();
+    //Fix boundary case when either door or storage switch is on but the other isn't (since they control the same strip)
+    //else if(readSwitch(onOff[3])||readSwitch(onOff[5])) break;
+    else {
+
+      clearStrip(strip[stripNum], stripDef[k][1], stripDef[k][2]); 
+    }
     delay(wait);
   }
   }
@@ -223,82 +204,5 @@ uint32_t Wheel(byte WheelPos, int k) {
   WheelPos -= 170;
   return strip[k].Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
-
-
-///////////////NEEDS REFACTORING///pre-multiple led strips 
-/*
-void chaseRange(int pixStart, int pixEnd, int cr, int cg, int cb, int holdTime){
-  for(int i=pixStart;i<pixEnd;i++){
-    // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
-    pixels.setPixelColor(i, pixels.Color(cr, cg, cb)); 
-    pixels.show(); // send pixel color to the hardware
-    delay(holdTime); // Delay for a period of time (in milliseconds) before setting next pixel
-  }
-} 
-void chaseRGB(int pixStart, int pixEnd) {
-    chaseRange(pixStart,pixEnd,140,0,0,25);
-    chaseRange(pixStart,pixEnd,0,140,0,25);
-    chaseRange(pixStart,pixEnd,0,0,140,25);
-    chaseRange(pixStart,pixEnd,0,0,0,25); 
-}
-
-void setRange(int pixStart, int pixEnd, int cr, int cg, int cb){
-  for (int i = pixStart; i<pixEnd; i++){
-    pixels.setPixelColor(i, pixels.Color(cr,cg,cb)); //set the color
-  }
-  pixels.show(); //show all the pixels after they are set
-}
-//infrared reciever function
-
-
-
-// Slightly different, this makes the rainbow equally distributed throughout
-void rainbowCycle(uint8_t wait) {
-  uint16_t i, j;
-
-  for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
-    for(i=0; i< pixels.numPixels(); i++) {
-      pixels.setPixelColor(i, Wheel(((i * 256 / pixels.numPixels()) + j) & 255));
-    }
-    pixels.show();
-    delay(wait);
-  }
-}
-
-//Theatre-style crawling lights with rainbow effect
-void theaterChaseRainbow(uint8_t wait) {
-  for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
-    for (int q=0; q < 3; q++) {
-      for (uint16_t i=0; i < pixels.numPixels(); i=i+3) {
-        pixels.setPixelColor(i+q, Wheel( (i+j) % 255));    //turn every third pixel on
-      }
-      pixels.show();
-
-      delay(wait);
-
-      for (uint16_t i=0; i < pixels.numPixels(); i=i+3) {
-        pixels.setPixelColor(i+q, 0);        //turn every third pixel off
-      }
-    }
-  }
-}
-
-// Input a value 0 to 255 to get a color value.
-// The colours are a transition r - g - b - back to r.
-uint32_t Wheel(byte WheelPos) {
-  WheelPos = 255 - WheelPos;
-  if(WheelPos < 85) {
-    return pixels.Color(255 - WheelPos * 3, 0, WheelPos * 3);
-  }
-  if(WheelPos < 170) {
-    WheelPos -= 85;
-    return pixels.Color(0, WheelPos * 3, 255 - WheelPos * 3);
-  }
-  WheelPos -= 170;
-  return pixels.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
-}
-*/
-
-
 
 
