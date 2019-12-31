@@ -29,4 +29,4 @@ Feature List:
 - Adafruit NeoPixel : Drives the WS2812s LED strip 
 
 # WISHLIST 
-  One feature I've always wanted to add is an alarm clock that fades the lights on with the sunrise outside. I have a few Ideas about how to do this; lighting sensor that detects the outside light, or a clock system that keeps track of the date and sunrise times. This is primarily held up by time. I have all the pieces sitting here. 
+ 1) One feature I've always wanted to add is an alarm clock that fades the lights on with the sunrise outside. I have a few Ideas about how to do this; lighting sensor that detects the outside light, or a clock system that keeps track of the date and sunrise times. This is primarily held up by time. I have all the pieces sitting here. 
